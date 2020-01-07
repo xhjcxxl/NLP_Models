@@ -51,6 +51,7 @@ def train(train_iter, dev_iter, model, args):
 
             steps += 1
             if steps % args.log_interval == 0:
+                # 每次迭代后 都会打印log日志
                 corrects = (torch.max(logit, 1)[1].view(target.size()).data == target.data).sum()
                 accuracy = 100.0 * corrects/batch.batch_size
                 sys.stdout.write(
@@ -61,7 +62,7 @@ def train(train_iter, dev_iter, model, args):
                                                                              batch.batch_size))
 
             if steps % args.test_interval == 0:
-                # 多少次迭代后 对 数据进行交叉验证集 测试
+                # 每100次迭代后 对 数据进行交叉验证集 测试
                 # 交叉验证 必须加 eval
                 # 对数据进行交叉验证集 测试验证
                 dev_acc = eval(dev_iter, model, args)
@@ -74,7 +75,7 @@ def train(train_iter, dev_iter, model, args):
                     if steps - last_step >= args.early_stop:
                         print('early stop by {} steps.'.format(args.early_stop))
             elif steps % args.save_interval == 0:
-                # 多少次迭代后 对数据进行保存
+                # 每500次迭代后 对数据进行保存
                 save(model, args.save_dir, "snapshot", steps)
 
 

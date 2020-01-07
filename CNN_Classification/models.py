@@ -33,7 +33,7 @@ class CNNText(nn.Module):
         # 定义dropout
         self.dropout = nn.Dropout(args.dropout)
         # 线性处理 全连接层
-        # 定义全连接层
+        # 定义全连接层 C = A*(len(Ks)*Co) 2 = A*300
         self.fc1 = nn.Linear(len(Ks) * Co, C)
 
     def conv_and_pool(self, x, conv):
@@ -47,6 +47,7 @@ class CNNText(nn.Module):
         x = F.max_pool1d(x, x.size(2)).squeeze(2)   # 最大池化 选择最大那个 在第二维度上压缩一个维度
         return x
 
+    # 重载 前向传播  自定义前向传播
     def forward(self, x):
         # 前向传播 通过模型计算预测值
         x = self.embed(x)  # (N, W, D)
