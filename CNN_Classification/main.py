@@ -17,7 +17,7 @@ def parser_set():
 
     # 训练相关参数
     parser.add_argument('-lr', type=float, default=0.001, help='初始化学习率[默认: 0.001]')
-    parser.add_argument('-epochs', type=int, default=128, help='训练中 总的数据训练轮数[默认: 128]')
+    parser.add_argument('-epochs', type=int, default=5, help='训练中 总的数据训练轮数[默认: 128]')
     parser.add_argument('-batch-size', type=int, default=64, help='训练中 一个批量的数据个数[默认: 64]')
     parser.add_argument('-log-interval', type=int, default=1, help='多少次迭代进行训练打印[default: 1]')
     parser.add_argument('-test-interval', type=int, default=100, help='多少次迭代进行测试[default: 100]')
@@ -46,20 +46,6 @@ def parser_set():
     parser.add_argument('-predict', type=str, default=None, help='预测给定的句子')
     args = parser.parse_args()
     return args
-
-
-# 加载 SST 数据集
-def sst(text_field, label_field, **kwargs):
-    # 采用 torchtext库中的 数据集用于SST
-    train_data, dev_data, test_data = datasets.SST.splits(text_field, label_field, fine_grained=True)
-    # 构建词表，即需要给每个单词编码，也就是用数字表示每个单词，这样才能传入模型
-    text_field.build_vocab(train_data, dev_data, test_data)
-    label_field.build_vocab(train_data, dev_data, test_data)
-    train_iter, dev_iter, test_iter = data.BucketIterator.splits(
-        (train_data, dev_data, test_data),
-        batch_sizes=(args.batch_size, len(dev_data), len(test_data)),
-        **kwargs)
-    return train_iter, dev_iter, test_iter
 
 
 # 加载 MR 数据集
@@ -95,8 +81,8 @@ if __name__ == '__main__':
     # sequential 是否把数据表示成序列，如果是False, 不能使用分词
     text_field = data.Field(lower=True)
     label_field = data.Field(sequential=False)
-    train_iter, dev_iter = mr(text_field, label_field, device=-1,
-                              repeat=False)  # 加载MR的数据集 传入 样本的field和标签的field格式， 设备选择CPU
+    # 加载MR的数据集 传入 样本的field和标签的field格式， 设备选择CPU
+    train_iter, dev_iter = mr(text_field, label_field, device=-1, repeat=False)
 
     # 更新参数 并打印
     args.embed_num = len(text_field.vocab)
@@ -126,6 +112,11 @@ if __name__ == '__main__':
     # 训练和测试模型
     # 预测命令存在 则进行预测
     if args.predict is not None:
+        print("加载模型")
+        f = open("best_model.txt", 'r')
+        args.snapshot = f.readline()
+        f.close()
+        cnn.load_state_dict(torch.load(args.snapshot))
         print("开始预测模型")
         label = train_data.predict(args.predict, cnn, text_field, label_field, False)
         print('\n[Text]  {}\n[label]  {}\n'.format(args.predict, label))

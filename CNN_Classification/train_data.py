@@ -70,6 +70,7 @@ def train(train_iter, dev_iter, model, args):
                     best_acc = dev_acc
                     last_step = steps
                     if args.save_best:
+                        # 对数据最好的模型进行保存
                         save(model, args.save_dir, 'best', steps)
                 else:
                     if steps - last_step >= args.early_stop:
@@ -135,3 +136,6 @@ def save(model, save_dir, save_prefix, steps):
     save_prefix = os.path.join(save_dir, save_prefix)
     save_path = '{}_steps_{}.pt'.format(save_prefix, steps)
     torch.save(model.state_dict(), save_path)
+    f = open("best_model.txt", 'w')
+    f.write(save_path)
+    f.close()

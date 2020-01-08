@@ -87,6 +87,7 @@ class MR(TarDataSet):
             return string.strip()
         # 在分词之后和数值化之前使用的管道 对数据进行清理
         # 管道会对输入的数据进行转化
+        # 先定义这个处理方法，每当传入数据到text_field中的时候就会对其进行处理
         print("正在调用MR初始化函数")
         text_field.preprocessing = data.Pipeline(clean_str)
         print(text_field, label_field)
@@ -125,6 +126,7 @@ class MR(TarDataSet):
         # 用来表示一个样本，数据+标签
         # 构建样本
         print("获取样本")
+        # 同时对样本 通过管道 进行处理
         examples = cls(text_field, label_field, path=path, **kwargs).examples
         # 打乱数据
         if shuffle:
@@ -134,7 +136,8 @@ class MR(TarDataSet):
         # li = [0, 1, 2, 3, 4, 5, 6, 7, 8]
         # print("li[-1:]: ", li[-1:])
         # print("li[:-1]: ", li[:-1])
-        # [1 2 ... -1066 ... 10662]
+        # 从前往后数 1 2 ... -1066 ... 10662
+        # -1066表示从后往前数1066个
         # 从前往后划分 划到 -1066为止 即 1到9596 为第一个集 应该是训练集
         # 从后往前化， 倒着数 -1066 划到最后一个10662 （即剩下的 9597到10662共1066个）为 测试集
         return (cls(text_field, label_field, examples=examples[:dev_index]),
