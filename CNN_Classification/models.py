@@ -28,6 +28,8 @@ class CNNText(nn.Module):
         # ModuleList是将子Module作为一个List来保存的，可以通过下标进行访问
         # 定义一层卷积层
         # 因为 Ks有多个则有多个卷积核， 3*D，4*D，5*D，故 有三个卷积层使用各自的卷积核 分别同时进行运算
+        # Co = 100 表示 一个卷积层 会使用 一种卷积核100个，输出通道为100维
+        # 一共三种卷积核 总共300个通道，这也是为什么后面要把 len(Ks) * Co 乘起来的原因
         self.convs1 = nn.ModuleList([nn.Conv2d(Ci, Co, (K, D)) for K in Ks])
         # 进行dropout处理 避免过拟合
         # 定义dropout
