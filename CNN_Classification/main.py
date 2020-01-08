@@ -54,7 +54,12 @@ def mr(text_field, label_field, **kwargs):
     # train_data 9596个 len(train_data)
     # dev_data 1066个 len(dev_data)
     train_data, dev_data = dataset.MR.splits(text_field, label_field)
-    # 构建词表，即需要给每个单词编码，也就是用数字表示每个单词，这样才能传入模型
+    # 构建词表，即需要给每个单词编码，也就是用数字表示每个单词
+    # 建立词表的目的是为了映射到int型的index上面，建立索引，这样每个词都会有一个整数索引号，就能够找到对应的词向量
+    # 因为我们的词向量是一个矩阵，大的矩阵，而通过词的索引号就能够找到词向量矩阵中的行
+    # 比如“我”的索引号对应是0，那么词向量矩阵中第0行就是词“我”的词向量，
+    # 表示字典对应的索引号应该和已经训练好的词向量对应，就是同一个词语对应的索引号应该是相同的
+    # 如果加载已经训练好的词向量，就要训练词表，让词表和词向量一一对应上。
     text_field.build_vocab(train_data, dev_data)
     label_field.build_vocab(train_data, dev_data)
     # 创建一个迭代器 从数据集中 加载 batches 的数据
@@ -85,6 +90,7 @@ if __name__ == '__main__':
     train_iter, dev_iter = mr(text_field, label_field, device=-1, repeat=False)
 
     # 更新参数 并打印
+    # 词的词表大小正好就是 词向量矩阵（V*D）的行V，维度D可以自己指定
     args.embed_num = len(text_field.vocab)
     args.class_num = len(label_field.vocab)
     args.cuda = (not args.no_cuda) and torch.cuda.is_available(); del args.no_cuda

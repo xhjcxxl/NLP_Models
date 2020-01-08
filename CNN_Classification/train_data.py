@@ -51,7 +51,7 @@ def train(train_iter, dev_iter, model, args):
 
             steps += 1
             if steps % args.log_interval == 0:
-                # 每次迭代后 都会打印log日志
+                # corrects 正确的 统计 预测值与标签相同，即预测正确的个数
                 corrects = (torch.max(logit, 1)[1].view(target.size()).data == target.data).sum()
                 accuracy = 100.0 * corrects/batch.batch_size
                 sys.stdout.write(

@@ -19,7 +19,7 @@ class CNNText(nn.Module):
         Co = args.kernel_num  # 卷积核的个数（多个卷积）
         Ks = args.kernel_sizes  # 卷积的尺寸 list[3,4,5]
 
-        # nn.Embedding 词向量化，生成随机矩阵，V行，D列，V*D
+        # nn.Embedding 设置词向量，生成随机矩阵，V行，D列，V*D
         self.embed = nn.Embedding(V, D)
         # 创建卷积层 创建一个二维卷积
         # 这里为什么要用K D呢，因为 在NLP中，只有上下滑动，没有左右滑动
@@ -61,7 +61,12 @@ class CNNText(nn.Module):
         x = [F.relu(conv(x)).squeeze(3) for conv in self.convs1]
         # 池化层
         x = [F.max_pool1d(i, i.size(2)).squeeze(2) for i in x]
-        # 按列拼接数据
+        # 卷积核3*d 一共词向量 10662个词向量，因此 3*d 得到列向量 3554*1，一共100个通道
+        # 卷积核4*d 一共词向量 10662个词向量，因此 4*d 得到列向量 2666*1，一共100个通道
+        # 卷积核5*d 一共词向量 10662个词向量，因此 5*d 得到列向量 2133*1，一共100个通道
+        # 最大池化 每个向量选出最大值 100个通道选出 100个
+        # 一共300个通道一共300个[100,100,100]
+        # 然后 按列 拼接起来 得到 100*3 矩阵
         x = torch.cat(x, 1)
         # 随机丢弃处理
         x = self.dropout(x)

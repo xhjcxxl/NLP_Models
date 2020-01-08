@@ -18,7 +18,6 @@ class TarDataSet(data.Dataset):
         # 路径拼接 根路径和目录名组成目标路径
         path = os.path.join(root, cls.dirname)
         # 如果不存在，就创建文件名
-        print(path)
         if not os.path.isdir(path):
             print("路径不存在")
             tpath = os.path.join(root, cls.filename)
