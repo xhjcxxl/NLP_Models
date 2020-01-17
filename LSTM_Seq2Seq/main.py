@@ -35,12 +35,11 @@ def parser_set():
     parser = argparse.ArgumentParser(description='机器翻译')
     parser.add_argument('-train', action='store_true', default=False, help='进行模型训练')
     parser.add_argument('-test', action='store_true', default=False, help='是否测试')
-    parser.add_argument('-predict', type=str, default=None, help='预测给定的句子')
     args = parser.parse_args()
 
     # 模型相关
-    args.enc_embed_dim = 256
-    args.dec_embed_dim = 256
+    args.enc_embed_dim = 300
+    args.dec_embed_dim = 300
     args.hidden_dim = 512
     args.num_layers = 2
     args.enc_dropout = 0.5
@@ -51,21 +50,19 @@ def parser_set():
     args.lr = 0.001
     args.clip = 1
     args.epochs = 10
-    args.batch_size = 128
-    SEED = 1234
-    random.seed(SEED)
-    torch.manual_seed(SEED)
+    args.batch_size = 64
+    # SEED = 1234
+    # random.seed(SEED)
+    # torch.manual_seed(SEED)
     return args
 
 
 def tokenize_de(text):
-    spacy_de = spacy.load('de')
     # 进行分词 并颠倒顺序
     return [tok.text for tok in spacy_de.tokenizer(text)][::-1]
 
 
 def tokenize_en(text):
-    spacy_en = spacy.load('en')
     # 进行分词 不颠倒顺序
     return [tok.text for tok in spacy_en.tokenizer(text)]
 
@@ -136,6 +133,8 @@ def load_model(model):
 
 
 if __name__ == '__main__':
+    spacy_de = spacy.load('de')
+    spacy_en = spacy.load('en')
     args = parser_set()
     define_dict()
     train_iter, dev_iter, test_iter = load_dataset(args.SRC_Field, args.TRG_Field)
@@ -149,12 +148,7 @@ if __name__ == '__main__':
         print("\t{}={}".format(attr.upper(), value))
 
     model = Seq2seq(args)
-    if args.predict is not None:
-        load_model(model)
-        print("开始预测模型")
-        outputs = train.predict(args.predict, model, args)
-        print(outputs)
-    elif args.test:
+    if args.test:
         try:
             load_model(model)
             print("开始测试模型")
@@ -168,7 +162,7 @@ if __name__ == '__main__':
         train.train_model(train_iter, dev_iter, model, args)
         print("训练完成")
     else:
-        print("请输入操作 python main.py -train | -test | -predict=text")
+        print("请输入操作 python main.py -train | -test")
 
 
 

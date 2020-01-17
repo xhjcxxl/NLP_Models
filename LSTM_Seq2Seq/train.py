@@ -103,20 +103,6 @@ def eval(dev_iter, model, cross_loss, args):
     return epoch_loss / len(dev_iter)
 
 
-def predict(text, model, args):
-    assert isinstance(text, str)
-    model.eval()
-    text = main.tokenize_de(text)
-    print(text)
-    text = [[args.SRC_Field.vocab.stoi[x] for x in text]]
-    x = torch.tensor(text)
-    x = Tautograd.Variable(x)
-    print(x)
-    output = model(x, torch.tensor([[10], [1]]), 0)
-    _, predicted = torch.max(output, 1)
-    return args.TRG_Field.vocab.itos[predicted.data[0]+1]
-
-
 def save(model, save_dir, save_prefix, steps):
     """
     保存模型
